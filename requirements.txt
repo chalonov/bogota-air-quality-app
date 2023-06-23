@@ -3,6 +3,7 @@ matplotlib
 numpy
 pandas
 seaborn
+xgboost
 plotly
 lmfit
 imageio
