@@ -10,8 +10,12 @@ st.set_page_config(
 
 st.write("""
 #  Calidad de aire en Bogotá
-Material particulado PM10 y PM2.5
+Análisis de la concentración de material particulado PM10 y PM2.5 en las distintas estaciones de monitoreo de la ciudad.
 """)
+
+nivel = st.radio(
+    "Nivel de concentración de PM",
+    ('PM2.5', 'PM10'))
 
 # DATOS
 df = pd.read_csv("data/AirQuality_Bogota_Estaciones_20210101_20230614.csv", sep = ";", decimal = ',')
@@ -25,26 +29,52 @@ stations_keys = ["Bolivia", "Carvajal - Sevillana", "CAR", "Colina", "Fontibón"
 
 st.header("Estaciones de la ciudad")
 
-fig, axs = plt.subplots(figsize=(12, 6))
-df.groupby(df["datetime"].dt.hour)["bolivia_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
-df.groupby(df["datetime"].dt.hour)["carvajal_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
-df.groupby(df["datetime"].dt.hour)["car_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
-df.groupby(df["datetime"].dt.hour)["colina_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
-df.groupby(df["datetime"].dt.hour)["fontibon_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
-df.groupby(df["datetime"].dt.hour)["guaymaral_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
-df.groupby(df["datetime"].dt.hour)["kennedy_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
-df.groupby(df["datetime"].dt.hour)["lasferias_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
-df.groupby(df["datetime"].dt.hour)["mambiente_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
-df.groupby(df["datetime"].dt.hour)["mfontibon_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
-df.groupby(df["datetime"].dt.hour)["paranda_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
-df.groupby(df["datetime"].dt.hour)["sancristobal_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
-df.groupby(df["datetime"].dt.hour)["suba_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
-df.groupby(df["datetime"].dt.hour)["tunal_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
-df.groupby(df["datetime"].dt.hour)["usaquen_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
-plt.title('Media PM2.5 por cada hora del dia [enero 2021 - junio 2023]')
-plt.xlabel("Hora del dia");
-plt.ylabel("$ \mu g /m^3$");
-plt.legend(stations_keys, bbox_to_anchor = (1.21, 0.6), loc='center right')
-plt.xticks(range(0, 24, 1))
-plt.grid()
-st.pyplot(fig)
+if nivel == 'PM2.5':
+    fig, axs = plt.subplots(figsize=(12, 9))
+    df.groupby(df["datetime"].dt.hour)["bolivia_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["carvajal_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["car_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["colina_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["fontibon_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["guaymaral_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["kennedy_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["lasferias_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["mambiente_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["mfontibon_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["paranda_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["sancristobal_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["suba_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["tunal_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["usaquen_pm2.5"].mean().plot(style="-o", rot=0, ax=axs)
+    plt.title('Media PM2.5 por cada hora del dia [enero 2021 - junio 2023]')
+    plt.xlabel("Hora del dia");
+    plt.ylabel("$ \mu g /m^3$");
+    plt.legend(stations_keys, bbox_to_anchor = (1.21, 0.6), loc='center right')
+    plt.xticks(range(0, 24, 1))
+    plt.grid()
+    st.pyplot(fig)
+else:
+    fig, axs = plt.subplots(figsize=(12, 9))
+    df.groupby(df["datetime"].dt.hour)["bolivia_pm10"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["carvajal_pm10"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["car_pm10"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["colina_pm10"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["fontibon_pm10"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["guaymaral_pm10"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["kennedy_pm10"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["lasferias_pm10"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["mambiente_pm10"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["mfontibon_pm10"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["paranda_pm10"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["sancristobal_pm10"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["suba_pm10"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["tunal_pm10"].mean().plot(style="-o", rot=0, ax=axs)
+    df.groupby(df["datetime"].dt.hour)["usaquen_pm10"].mean().plot(style="-o", rot=0, ax=axs)
+    plt.title('Media PM10 por cada hora del dia [enero 2021 - junio 2023]')
+    plt.xlabel("Hora del dia");
+    plt.ylabel("$ \mu g /m^3$");
+    plt.legend(stations_keys, bbox_to_anchor = (1.21, 0.6), loc='center right')
+    plt.xticks(range(0, 24, 1))
+    plt.grid()
+    st.pyplot(fig)
+

@@ -14,11 +14,11 @@ df["datetime"] = pd.date_range('2021-01-01 01:00:00', periods=len(df), freq='H')
 df["month"] = df["datetime"].dt.month
 
 st.write("""
-#  Calidad de aire en Bogotá
+#  Análisis por estaciones
 Material particulado PM10 y PM2.5
 """)
 
-st.sidebar.title('Parámetros')
+# st.title('Parámetros')
 
 stations_keys = ["Bolivia", "Carvajal - Sevillana", "CAR", "Colina", "Fontibón", "Guaymaral",
                  "Kennedy", "Las Ferias", "M.Ambiente", "Mov.Fontibón", "P.Aranda", "S.Cristobal",
@@ -29,7 +29,7 @@ stations_values = ["bolivia", "carvajal", "car", "colina", "fontibon", "guaymara
 
 #  create dictionary for stations
 stations = dict(zip(stations_keys, stations_values))
-station_to_view = st.sidebar.selectbox(
+station_to_view = st.selectbox(
     "Escoja la estación a analizar",
     (stations_keys)
 )
