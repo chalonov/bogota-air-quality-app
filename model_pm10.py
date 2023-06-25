@@ -23,7 +23,7 @@ date_to_train = '01-01-2023'
 #--------------------------------------
 
 stations_values = ["bolivia", "carvajal", "car", "colina", "fontibon", "guaymaral", 
-                    "kennedy", "lasferias", "mambiente", "mfontibón", "paranda", "sancristobal",
+                    "kennedy", "lasferias", "mambiente", "mfontibon", "paranda", "sancristobal",
                     "suba", "tunal", "usaquen"]
 
 for station in stations_values:
