@@ -29,29 +29,36 @@ stations_keys = ["Bolivia", "Carvajal - Sevillana", "CAR", "Colina", "Fontibón"
                  "Kennedy", "Las Ferias", "M.Ambiente", "Mov.Fontibón", "P.Aranda", "S.Cristobal",
                  "Suba", "Tunal", "Usaquen"]
 stations_values = ["bolivia", "carvajal", "car", "colina", "fontibon", "guaymaral", 
-                   "kennedy", "lasferias", "mambiente", "mfontibón", "paranda", "sancristobal",
+                   "kennedy", "lasferias", "mambiente", "mfontibon", "paranda", "sancristobal",
                    "suba", "tunal", "usaquen"]
 
 stations = dict(zip(stations_keys, stations_values))
-station_to_view = st.sidebar.selectbox(
-    "Escoja la estación a predecir",
-    (stations_keys)
-)
+
 
 #  create dictionary for PM levels
 pm_keys = ["PM2.5", "PM10"]
 pm_values = ["_pm2.5", "_pm10"]
 
 pms = dict(zip(pm_keys, pm_values))
-nivel = st.sidebar.radio(
+
+
+
+col1, col2 = st.columns(2)
+
+with col1:
+   station_to_view = st.selectbox(
+    "Escoja la estación a predecir",
+    (stations_keys))
+
+with col2:
+   nivel = st.radio(
     "Nivel de concentración de PM",
     ('PM2.5', 'PM10'))
 
+
 station = stations[station_to_view] + pms[nivel]
 
-st.text(station)
-
-if st.sidebar.button('Ejecutar'):
+if st.button('Ejecutar'):
     # Load data (deserialize)
     with open('pickle/model_' + station, 'rb') as handle:
         df = pickle.load(handle)    
