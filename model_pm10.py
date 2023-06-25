@@ -14,95 +14,103 @@ df["month"] = df["datetime"].dt.month
 df_mean = df.fillna(df.mean())
 df_mean.isna().sum()
 
+date_to_train = '01-01-2023'
+
 # Modificar estacion y periodo a analizar
 #--------------------------------------
-station = 'fontibon' 
-date_to_train = '01-01-2023'
+#station = 'fontibon' 
+
 #--------------------------------------
 
-station_pm10 = station + '_pm10'
-station_pm25 =  station + '_pm2.5'
-df = df_mean[['datetime', station_pm10, station_pm25]]
-df = df.set_index('datetime')
-df.index = pd.to_datetime(df.index)
+stations_values = ["bolivia", "carvajal", "car", "colina", "fontibon", "guaymaral", 
+                    "kennedy", "lasferias", "mambiente", "mfontibón", "paranda", "sancristobal",
+                    "suba", "tunal", "usaquen"]
 
-train = df.loc[df.index < date_to_train]
-test = df.loc[df.index >= date_to_train]
+for station in stations_values:
 
-#fig, ax = plt.subplots(figsize=(14, 5))
-#train.plot(ax=ax, label='Training Set', title='Data Train/Test Split')
-#test.plot(ax=ax, label='Test Set')
-#ax.legend(['Training Set', 'Test Set'])
-#plt.show()
+    station_pm10 = station + '_pm10'
+    station_pm25 =  station + '_pm2.5'
+    df = df_mean[['datetime', station_pm10, station_pm25]]
+    df = df.set_index('datetime')
+    df.index = pd.to_datetime(df.index)
 
-def create_features(df):
-    """
-    Create time series features based on time series index.
-    """
-    df = df.copy()
-    df['hour'] = df.index.hour
-    df['dayofweek'] = df.index.dayofweek
-    df['quarter'] = df.index.quarter
-    df['month'] = df.index.month
-    df['year'] = df.index.year
-    df['dayofyear'] = df.index.dayofyear
-    df['dayofmonth'] = df.index.day
-    df['weekofyear'] = df.index.isocalendar().week
-    return df
+    train = df.loc[df.index < date_to_train]
+    test = df.loc[df.index >= date_to_train]
 
-df = create_features(df)
+    #fig, ax = plt.subplots(figsize=(14, 5))
+    #train.plot(ax=ax, label='Training Set', title='Data Train/Test Split')
+    #test.plot(ax=ax, label='Test Set')
+    #ax.legend(['Training Set', 'Test Set'])
+    #plt.show()
 
-train = create_features(train)
-test = create_features(test)
+    def create_features(df):
+        """
+        Create time series features based on time series index.
+        """
+        df = df.copy()
+        df['hour'] = df.index.hour
+        df['dayofweek'] = df.index.dayofweek
+        df['quarter'] = df.index.quarter
+        df['month'] = df.index.month
+        df['year'] = df.index.year
+        df['dayofyear'] = df.index.dayofyear
+        df['dayofmonth'] = df.index.day
+        df['weekofyear'] = df.index.isocalendar().week
+        return df
 
-FEATURES = ['dayofyear', 'hour', 'dayofweek', 'quarter', 'month', station_pm25]
-TARGET = station_pm10
+    df = create_features(df)
 
-X_train = train[FEATURES]
-y_train = train[TARGET]
+    train = create_features(train)
+    test = create_features(test)
 
-X_test = test[FEATURES]
-y_test = test[TARGET]
+    FEATURES = ['dayofyear', 'hour', 'dayofweek', 'quarter', 'month', station_pm25]
+    TARGET = station_pm10
 
-reg = xgb.XGBRegressor(base_score=0.5, booster='gbtree',    
-                       n_estimators=1000,
-                       early_stopping_rounds=50,
-                       objective='reg:linear',
-                       max_depth=3,
-                       learning_rate=0.01)
-reg.fit(X_train, y_train,
-        eval_set=[(X_train, y_train), (X_test, y_test)],
-        verbose=100)
-# Feature importance
-#fi = pd.DataFrame(data=reg.feature_importances_,
-#             index=reg.feature_names_in_,
-#             columns=['importance'])
-#fi.sort_values('importance').plot(kind='barh', title='Feature Importance')
-#plt.grid()
-#plt.show()
+    X_train = train[FEATURES]
+    y_train = train[TARGET]
 
-test['prediction'] = reg.predict(X_test)
-df = df.merge(test[['prediction']], how='left', left_index=True, right_index=True)
+    X_test = test[FEATURES]
+    y_test = test[TARGET]
 
-#ax = df.loc[(df.index > '06-01-2023 ') & (df.index < '06-15-2023')][station_pm10].plot(figsize=(15, 5), title='Últimos 15 dias')
-#df.loc[(df.index > '06-01-2023') & (df.index < '06-15-2023')]['prediction'].plot(style='--')
-#plt.legend(['Truth Data','Prediction'])
-#plt.grid()
-#plt.show()
+    reg = xgb.XGBRegressor(base_score=0.5, booster='gbtree',    
+                        n_estimators=1000,
+                        early_stopping_rounds=50,
+                        objective='reg:linear',
+                        max_depth=3,
+                        learning_rate=0.01)
+    reg.fit(X_train, y_train,
+            eval_set=[(X_train, y_train), (X_test, y_test)],
+            verbose=100)
+    # Feature importance
+    #fi = pd.DataFrame(data=reg.feature_importances_,
+    #             index=reg.feature_names_in_,
+    #             columns=['importance'])
+    #fi.sort_values('importance').plot(kind='barh', title='Feature Importance')
+    #plt.grid()
+    #plt.show()
 
-score = np.sqrt(mean_squared_error(test[station_pm10], test['prediction']))
-print(f'RMSE Score on Test set: {score:0.2f}')
+    test['prediction'] = reg.predict(X_test)
+    df = df.merge(test[['prediction']], how='left', left_index=True, right_index=True)
 
-test['error'] = np.abs(test[TARGET] - test['prediction'])
-test['date'] = test.index.date
-test.groupby(['date'])['error'].mean().sort_values(ascending=False).head(10)
+    #ax = df.loc[(df.index > '06-01-2023 ') & (df.index < '06-15-2023')][station_pm10].plot(figsize=(15, 5), title='Últimos 15 dias')
+    #df.loc[(df.index > '06-01-2023') & (df.index < '06-15-2023')]['prediction'].plot(style='--')
+    #plt.legend(['Truth Data','Prediction'])
+    #plt.grid()
+    #plt.show()
 
-# Store data (serialize)
-with open('pickle/model_' + station_pm10, 'wb') as handle:
-    pickle.dump(df, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    score = np.sqrt(mean_squared_error(test[station_pm10], test['prediction']))
+    print(f'RMSE Score on Test set: {score:0.2f}')
 
-with open('pickle/score_' + station_pm10, 'wb') as handle:
-    pickle.dump(score, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    test['error'] = np.abs(test[TARGET] - test['prediction'])
+    test['date'] = test.index.date
+    test.groupby(['date'])['error'].mean().sort_values(ascending=False).head(10)
 
-with open('pickle/reg_' + station_pm10, 'wb') as handle:
-    pickle.dump(reg, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    # Store data (serialize)
+    with open('pickle/model_' + station_pm10, 'wb') as handle:
+        pickle.dump(df, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    with open('pickle/score_' + station_pm10, 'wb') as handle:
+        pickle.dump(score, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    with open('pickle/reg_' + station_pm10, 'wb') as handle:
+        pickle.dump(reg, handle, protocol=pickle.HIGHEST_PROTOCOL)
