@@ -5,7 +5,9 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(
     page_title="Inicio - Bogotá Air Quality",
-    page_icon="👋",
+    page_icon="⛅",
 )
 
-st.write("# Welcome to Bogotá Air Quality App 👋")
+st.write("# Bogotá Air Quality App ⛅")
+st.text('Creado por: Gonzalo Novoa')
+

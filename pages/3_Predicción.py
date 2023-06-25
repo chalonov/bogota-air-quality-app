@@ -9,7 +9,7 @@ from sklearn.metrics import mean_squared_error
 color_pal = sns.color_palette()
 
 st.set_page_config(
-    page_title="Predicción PM - Bogotá Air Quality",
+    page_title="Predicción PM",
     page_icon="⛅",
 )
 
