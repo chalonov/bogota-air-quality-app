@@ -1,3 +1,4 @@
+import pickle
 import streamlit as st
 import pandas as pd 
 import numpy as np
@@ -23,81 +24,48 @@ st.markdown(
     """
 )
 
-# DATOS
-df = pd.read_csv("data/AirQuality_Bogota_Estaciones_20210101_20230614.csv", sep = ";", decimal = ',')
-df["datetime"] = pd.date_range('2021-01-01 01:00:00', periods=len(df), freq='H')
-df["month"] = df["datetime"].dt.month
+#  create dictionary for stations
+stations_keys = ["Bolivia", "Carvajal - Sevillana", "CAR", "Colina", "Fontibón", "Guaymaral",
+                 "Kennedy", "Las Ferias", "M.Ambiente", "Mov.Fontibón", "P.Aranda", "S.Cristobal",
+                 "Suba", "Tunal", "Usaquen"]
+stations_values = ["bolivia", "carvajal", "car", "colina", "fontibon", "guaymaral", 
+                   "kennedy", "lasferias", "mambiente", "mfontibón", "paranda", "sancristobal",
+                   "suba", "tunal", "usaquen"]
 
-df_mean = df.fillna(df.mean())
-df_mean.isna().sum()
+stations = dict(zip(stations_keys, stations_values))
+station_to_view = st.sidebar.selectbox(
+    "Escoja la estación a predecir",
+    (stations_keys)
+)
 
-# Modificar estacion y periodo a analizar
-#--------------------------------------
-station = 'fontibon' 
-date_to_train = '01-01-2023'
-#--------------------------------------
+#  create dictionary for PM levels
+pm_keys = ["PM2.5", "PM10"]
+pm_values = ["_pm2.5", "_pm10"]
 
-station_pm10 = station + '_pm10'
-station_pm25 =  station + '_pm2.5'
-df = df_mean[['datetime', station_pm10, station_pm25]]
-df = df.set_index('datetime')
-df.index = pd.to_datetime(df.index)
+pms = dict(zip(pm_keys, pm_values))
+nivel = st.sidebar.radio(
+    "Nivel de concentración de PM",
+    ('PM2.5', 'PM10'))
 
-train = df.loc[df.index < date_to_train]
-test = df.loc[df.index >= date_to_train]
+station = stations[station_to_view] + pms[nivel]
 
-#fig, ax = plt.subplots(figsize=(12, 6))
-#train.plot(ax=ax, label='Training Set', title='Data Train/Test Split')
-#test.plot(ax=ax, label='Test Set')
-#ax.legend(['Training Set', 'Test Set'])
-#st.pyplot(fig)
+st.text(station)
 
-def create_features(df):
-    """
-    Create time series features based on time series index.
-    """
-    df = df.copy()
-    df['hour'] = df.index.hour
-    df['dayofweek'] = df.index.dayofweek
-    df['quarter'] = df.index.quarter
-    df['month'] = df.index.month
-    df['year'] = df.index.year
-    df['dayofyear'] = df.index.dayofyear
-    df['dayofmonth'] = df.index.day
-    df['weekofyear'] = df.index.isocalendar().week
-    return df
+if st.sidebar.button('Ejecutar'):
+    # Load data (deserialize)
+    with open('pickle/model_' + station, 'rb') as handle:
+        df = pickle.load(handle)    
 
-df = create_features(df)
+    ax = df.loc[(df.index > '06-01-2023 ') & (df.index < '06-15-2023')][station].plot(figsize=(12, 6))
+    df.loc[(df.index > '06-01-2023') & (df.index < '06-15-2023')]['prediction'].plot(style='--')
+    plt.title('Últimos 15 dias - ' + station_to_view)
+    plt.xlabel("días")
+    plt.ylabel("$ \mu g /m^3$")
+    plt.legend(['Datos reales','Predicción'])
+    plt.grid()
+    st.pyplot(plt)
 
-train = create_features(train)
-test = create_features(test)
-
-FEATURES = ['dayofyear', 'hour', 'dayofweek', 'quarter', 'month', station_pm25]
-TARGET = station_pm10
-
-X_train = train[FEATURES]
-y_train = train[TARGET]
-
-X_test = test[FEATURES]
-y_test = test[TARGET]
-
-reg = xgb.XGBRegressor(base_score=0.5, booster='gbtree',    
-                       n_estimators=1000,
-                       early_stopping_rounds=50,
-                       objective='reg:linear',
-                       max_depth=3,
-                       learning_rate=0.01)
-reg.fit(X_train, y_train,
-        eval_set=[(X_train, y_train), (X_test, y_test)],
-        verbose=100)
-
-test['prediction'] = reg.predict(X_test)
-df = df.merge(test[['prediction']], how='left', left_index=True, right_index=True)
-
-ax = df.loc[(df.index > '06-01-2023 ') & (df.index < '06-14-2023')][station_pm10].plot(figsize=(12, 6), title='Últimos 15 días')
-df.loc[(df.index > '06-01-2023') & (df.index < '06-14-2023')]['prediction'].plot(style='--')
-plt.xlabel("días");
-plt.ylabel("$ \mu g /m^3$");
-plt.legend(['Datos reales','Predicción'])
-plt.grid()
-st.pyplot(plt)
+    with open('pickle/score_' + station, 'rb') as handle:
+        score = pickle.load(handle)  
+    
+    st.text(f'RMSE Score on Test set: {score:0.2f}')
