@@ -74,5 +74,9 @@ if st.button('Ejecutar'):
 
     with open('pickle/score_' + station, 'rb') as handle:
         score = pickle.load(handle)  
+
+    with open('pickle/training_score_' + station, 'rb') as handle:
+        training_score = pickle.load(handle)  
     
     st.text(f'RMSE Score on Test set: {score:0.2f}')
+    st.text(f'Training Score: {training_score:0.2f}')

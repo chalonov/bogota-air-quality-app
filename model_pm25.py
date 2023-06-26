@@ -81,6 +81,9 @@ for station in stations_values:
     reg.fit(X_train, y_train,
             eval_set=[(X_train, y_train), (X_test, y_test)],
             verbose=100)
+    
+    training_score = reg.score(X_train, y_train)
+
     # Feature importance
     #fi = pd.DataFrame(data=reg.feature_importances_,
     #             index=reg.feature_names_in_,
@@ -114,3 +117,6 @@ for station in stations_values:
 
     with open('pickle/reg_' + station_pm25, 'wb') as handle:
         pickle.dump(reg, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    with open('pickle/training_score_' + station_pm25, 'wb') as handle:
+        pickle.dump(training_score, handle, protocol=pickle.HIGHEST_PROTOCOL)
