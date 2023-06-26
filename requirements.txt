@@ -4,13 +4,4 @@ numpy
 pandas
 seaborn
 xgboost
-plotly
-lmfit
-imageio
-tabulate
 scikit-learn
-gsheetsdb
-youtube_transcript_api
-yfinance
-patsy
-statsmodels
