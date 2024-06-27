@@ -61,10 +61,6 @@ The `utils.py` file contains helper functions for creating various plots used th
 
 The prediction feature uses XGBoost, a gradient boosting framework. The models are trained separately for each station and PM level, and their performance is evaluated using RMSE (Root Mean Square Error).
 
-## Creator
-
-This app was created by Gonzalo Novoa.
-
 ## Note
 
 Make sure to have all the required dependencies installed and the necessary data files in the correct directories before running the app. The data file should be located at `data/AirQuality_Bogota_Estaciones_20210101_20230614.csv`.
